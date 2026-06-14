@@ -21,4 +21,4 @@ jobs:
         with:
           bins: test
       - name: Run tests
-        run: mq-test github_actions_tests.mq
+        run: mq-test gha_tests.mq
