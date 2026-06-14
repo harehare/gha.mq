@@ -1,0 +1,113 @@
+# GitHub Actions Workflow Utilities for mq
+# https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions
+
+import "yaml"
+
+# Parses a GitHub Actions workflow YAML string and returns the parsed structure.
+def gha_parse(input):
+  yaml::yaml_parse(to_string(input))
+end
+
+# Returns the workflow name.
+def gha_name(workflow):
+  workflow["name"]
+end
+
+# Returns the trigger events (`on:` key) of a workflow.
+def gha_triggers(workflow):
+  workflow["on"]
+end
+
+# Returns all jobs as a dict.
+def gha_jobs(workflow):
+  workflow["jobs"]
+end
+
+# Returns the list of job names in a workflow.
+def gha_job_names(workflow):
+  let jobs = gha_jobs(workflow)
+  | if (is_none(jobs)): [] else: keys(jobs)
+end
+
+# Returns the steps array for a given job dict.
+def gha_steps(job):
+  if (is_none(job["steps"])): [] else: job["steps"]
+end
+
+# Returns the environment variables dict for a workflow, job, or step.
+def gha_env(x):
+  if (is_none(x["env"])): dict() else: x["env"]
+end
+
+# Returns the `uses` action reference from a step dict, or None if not present.
+def gha_uses(step):
+  step["uses"]
+end
+
+# Returns the `run` shell command from a step dict, or None if not present.
+def gha_run(step):
+  step["run"]
+end
+
+# Returns the `name` field from a step dict.
+def gha_step_name(step):
+  step["name"]
+end
+
+# Returns the `with` inputs dict from a step dict.
+def gha_step_with(step):
+  if (is_none(step["with"])): dict() else: step["with"]
+end
+
+# Returns the workflow_dispatch inputs dict, or an empty dict if not defined.
+def gha_inputs(workflow):
+  let on = gha_triggers(workflow)
+  | if (is_none(on)): dict()
+    elif (is_none(on["workflow_dispatch"])): dict()
+    elif (is_none(on["workflow_dispatch"]["inputs"])): dict()
+    else: on["workflow_dispatch"]["inputs"]
+end
+
+# Returns the permissions dict for a workflow or job.
+def gha_permissions(x):
+  if (is_none(x["permissions"])): dict() else: x["permissions"]
+end
+
+# Returns the `needs` array for a job (its upstream dependencies).
+def gha_job_needs(job):
+  if (is_none(job["needs"])): []
+  elif (is_string(job["needs"])): [job["needs"]]
+  else: job["needs"]
+end
+
+# Returns the matrix strategy dict for a job, or None if not defined.
+def gha_matrix(job):
+  if (is_none(job["strategy"])): None
+  elif (is_none(job["strategy"]["matrix"])): None
+  else: job["strategy"]["matrix"]
+end
+
+# Returns all steps across all jobs whose `uses` matches the given regex pattern.
+def gha_find_steps_by_uses(workflow, pattern):
+  let jobs = gha_jobs(workflow)
+  | let names = gha_job_names(workflow)
+  | fold(names, [], fn(acc, name):
+      let steps = gha_steps(jobs[name])
+      | acc + filter(steps, fn(s): !is_none(gha_uses(s)) && is_regex_match(gha_uses(s), pattern);)
+    end)
+end
+
+# Returns a Markdown table summarizing all jobs in a workflow.
+def gha_to_markdown_table(workflow):
+  let jobs = gha_jobs(workflow)
+  | let names = gha_job_names(workflow)
+  | let header = "| Job | Steps | Runs On |"
+  | let sep = "| --- | --- | --- |"
+  | let rows = map(names, fn(name):
+      let job = jobs[name]
+      | let step_count = to_string(len(gha_steps(job)))
+      | let runs_on = if (is_none(job["runs-on"])): "" else: to_string(job["runs-on"])
+      | "| " + name + " | " + step_count + " | " + runs_on + " |"
+    end)
+  | join([header, sep] + rows, "\n")
+end
