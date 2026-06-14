@@ -1,4 +1,4 @@
-<h1 align="center">github_actions.mq</h1>
+<h1 align="center">gha.mq</h1>
 
 A [GitHub Actions](https://docs.github.com/en/actions) workflow utility module implemented for [mq](https://github.com/harehare/mq).
 
@@ -12,17 +12,17 @@ A [GitHub Actions](https://docs.github.com/en/actions) workflow utility module i
 
 ## Installation
 
-Copy `github_actions.mq` to your mq module directory, or reference it with `-L`.
+Copy `gha.mq` to your mq module directory, or reference it with `-L`.
 
 ```sh
-cp github_actions.mq ~/.local/mq/config/
+cp gha.mq ~/.local/mq/config/
 ```
 
 ## Usage
 
 ```sh
 mq -L /path/to/modules -I raw \
-  'import "github_actions" | github_actions::gha_parse(.) | github_actions::gha_job_names(.)' workflow.yml
+  'import "gha" | gha::gha_parse(.) | gha::gha_job_names(.)' workflow.yml
 ```
 
 ## API
@@ -64,6 +64,12 @@ Parses a GitHub Actions workflow YAML string and returns the parsed structure.
 | `gha_step_with(step)` | `with` inputs dict |
 | `gha_env(step)` | Step-level env dict |
 
+### Serialization
+
+| Function | Description |
+|---|---|
+| `gha_stringify(workflow)` | Convert a parsed workflow dict back to a YAML string |
+
 ### Search & Rendering
 
 | Function | Description |
@@ -91,19 +97,15 @@ jobs:
 
 ```sh
 # List job names
-mq -L . -I raw 'import "github_actions" | github_actions::gha_parse(.) | github_actions::gha_job_names(.)' ci.yml
+mq -L . -I raw 'import "gha" | gha::gha_parse(.) | gha::gha_job_names(.)' ci.yml
 # => ["build"]
 
 # Find all checkout steps
-mq -L . -I raw 'import "github_actions" | github_actions::gha_parse(.) | github_actions::gha_find_steps_by_uses(., "actions/checkout")' ci.yml
+mq -L . -I raw 'import "gha" | gha::gha_parse(.) | gha::gha_find_steps_by_uses(., "actions/checkout")' ci.yml
 
 # Render a Markdown summary
-mq -L . -I raw 'import "github_actions" | github_actions::gha_parse(.) | github_actions::gha_to_markdown_table(.)' ci.yml
+mq -L . -I raw 'import "gha" | gha::gha_parse(.) | gha::gha_to_markdown_table(.)' ci.yml
 ```
-
-## Compatibility
-
-Requires [mq](https://github.com/harehare/mq) v0.5 or later.
 
 ## License
 

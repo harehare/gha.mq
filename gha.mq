@@ -97,6 +97,11 @@ def gha_find_steps_by_uses(workflow, pattern):
     end)
 end
 
+# Converts a parsed workflow dict back to a YAML string.
+def gha_stringify(workflow):
+  yaml::yaml_stringify(workflow)
+end
+
 # Returns a Markdown table summarizing all jobs in a workflow.
 def gha_to_markdown_table(workflow):
   let jobs = gha_jobs(workflow)
