@@ -18,6 +18,20 @@ Copy `gha.mq` to your mq module directory, or reference it with `-L`.
 cp gha.mq ~/.local/mq/config/
 ```
 
+### HTTP Import (no local installation needed)
+
+If `mq` was built with the `http-import` feature, you can import directly from GitHub without any local setup:
+
+```sh
+mq -I raw 'import "github.com/harehare/gha.mq" | gha::gha_parse(.) | gha::gha_job_names(.)' workflow.yml
+```
+
+Pin to a specific release with `@vX.Y.Z`:
+
+```sh
+mq -I raw 'import "github.com/harehare/gha.mq@v0.1.0" | gha::gha_parse(.) | gha::gha_job_names(.)' workflow.yml
+```
+
 ## Usage
 
 ```sh
